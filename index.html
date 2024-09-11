@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <style>
+      #first-content {
+        display: none;
+      }
+      .input-error {
+        border: 1px solid red;
+        background-color: red;
+      }
+      #back-message {
+        color: white;
+        display: none;
+      }
+      .error-message {
+        background-color: red;
+      }
+      .success-message {
+        background-color: green;
+      }
+    </style>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jquery</title>
+  </head>
+  <body>
+    <button id="first-btn">Slider</button>
+    <div id="first-content">
+      Lorem ipsum dolor sit amet consectetur, adipisicing elit. Reprehenderit
+      est, optio fugiat, qui aut praesentium repellendus quibusdam nostrum,
+      aspernatur dolor eius? Quas quaerat hic excepturi eos impedit sequi,
+      nesciunt aperiam!
+    </div>
+
+    <form id="form">
+      <div id="back-message"></div>
+      <input type="email" id="email" /><br />
+      <input type="password" id="password" /><br />
+      <a href="" id="toggle-password">Voir le mot de passe</a>
+      <button>Submit</button>
+    </form>
+
+    <script src="./assets/jquery.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#first-btn").click(function () {
+          $("#first-content").fadeToggle(3000);
+        });
+        $("#toggle-password").click(function (e) {
+          e.preventDefault();
+          console.log($("#password").attr("type"));
+          $("#password").attr(
+            "type",
+            $("#password").attr("type") === "password" ? "text" : "password"
+          );
+          $("#password").attr("type") === "password"
+            ? $(this).text("Voir le mot de passe.")
+            : $(this).text("cacher le mot de passe.");
+        });
+        $("#form").submit(function (e) {
+          let email = $("#email").val();
+
+          let password = $("#password").val();
+
+          if (email.trim().length === 0) {
+            e.preventDefault();
+            $("#email").addClass("input-error");
+          } else {
+            $("#email").removeClass("input-error");
+          }
+
+          if (password.trim().length === 0) {
+            e.preventDefault();
+            $("#password").addClass("input-error");
+          } else {
+            $("#password").removeClass("input-error");
+          }
+
+          e.preventDefault();
+          $.ajax({
+            url: "./processing/processing.php",
+            type: "Post",
+            async: true,
+            data: {
+              email: email,
+              password: password,
+            },
+            success: function (data) {
+              console.log(data.length);
+              if (data == "success") {
+                $("#back-message").removeClass("error-message");
+                $("#back-message").addClass("success-message");
+                $("#back-message").text("Operation successfully !");
+              } else {
+                $("#back-message").removeClass("success-message");
+                $("#back-message").addClass("error-message");
+                $("#back-message").text("An error occur !");
+              }
+              $("#back-message").show(1000);
+            },
+            error: function (xhr, exception) {
+              var msg = "";
+              if (xhr.status === 0) {
+                msg = "Not connect.\n Verify Network." + xhr.responseText;
+              } else if (xhr.status == 404) {
+                msg = "Requested page not found. [404]" + xhr.responseText;
+              } else if (xhr.status == 500) {
+                msg = "Internal Server Error [500]." + xhr.responseText;
+              } else if (exception === "parsererror") {
+                msg = "Requested JSON parse failed.";
+              } else if (exception === "timeout") {
+                msg = "Time out error." + xhr.responseText;
+              } else if (exception === "abort") {
+                msg = "Ajax request aborted.";
+              } else {
+                msg = "Error:" + xhr.status + " " + xhr.responseText;
+              }
+              console.log(xhr);
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
